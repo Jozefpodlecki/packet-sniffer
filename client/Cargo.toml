@@ -7,3 +7,5 @@ rust-version = "1.85.0"
 [dependencies]
 tokio = { version = "1.41.0", features = ["rt", "rt-multi-thread", "macros"] }
 anyhow = "1.0.96"
+log = "0.4"
+log4rs = "1.3.0"

@@ -5,6 +5,7 @@ edition = "2024"
 rust-version = "1.85.0"
 
 [lib]
+name = "sniffer_lib"
 crate-type = ["cdylib"]
 path = "src/lib.rs"
 
@@ -13,7 +14,7 @@ name = "sniffer-cli"
 path = "src/main.rs"
 
 [dependencies]
-tokio = { version = "1.41.0", features = ["rt", "rt-multi-thread", "signal", "macros"] }
+tokio = { version = "1.41.0", features = ["rt", "rt-multi-thread", "signal", "time", "sync", "macros"] }
 windivert = "0.6.0"
 anyhow = "1.0.96"
 log = "0.4"

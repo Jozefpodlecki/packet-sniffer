@@ -46,11 +46,9 @@ async fn main() -> Result<()> {
 
                         let data = &packet.data;
 
-                        // Extract IP Addresses
                         let src_ip = Ipv4Addr::new(data[12], data[13], data[14], data[15]);
                         let dst_ip = Ipv4Addr::new(data[16], data[17], data[18], data[19]);
 
-                        // Extract Ports (Big Endian conversion)
                         let src_port = u16::from_be_bytes([data[20], data[21]]);
                         let dst_port = u16::from_be_bytes([data[22], data[23]]);
 

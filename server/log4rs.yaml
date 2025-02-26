@@ -1,0 +1,20 @@
+appenders:
+  stdout:
+    kind: console
+
+  file:
+    kind: rolling_file
+    path: "logs/app.log"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 10mb
+      roller:
+        kind: delete  
+
+root:
+  level: info
+  appenders:
+    - stdout
+    - file

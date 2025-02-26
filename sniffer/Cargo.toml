@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85.0"
 
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "sniffer-cli"
+path = "src/main.rs"
+
 [dependencies]
 tokio = { version = "1.41.0", features = ["rt", "rt-multi-thread", "macros"] }
 windivert = "0.6.0"

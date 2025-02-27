@@ -1,20 +1,48 @@
-use std::time::Duration;
+use std::{thread, time::Duration};
 
-use tokio::{sync::mpsc::{self, Receiver}, time::sleep};
+use tokio::{runtime::Runtime, sync::mpsc::{self, Receiver}, time::sleep};
+
+#[repr(C)] 
+pub enum Packet {
+    Damage {
+        object_id: i32,
+    }
+}
 
 #[unsafe(no_mangle)]
-pub extern "C" fn start_capture() -> *mut Receiver<i32> {
-    let (tx, mut rx) = mpsc::channel::<i32>(10);
+pub extern "C" fn start_capture() -> *mut std::sync::mpsc::Receiver<Packet> {
+    let (tx, rx) = std::sync::mpsc::channel::<Packet>();
 
-    tokio::spawn(async move {
-        let mut index = 0;
-
+    std::thread::spawn(move || {
         loop {
-            sleep(Duration::from_secs(2)).await;
-            tx.send(index).await.unwrap();
-            index += 1;
-            index = index % 100;
+            thread::sleep(Duration::from_secs(2));
+            let payload = Packet::Damage {
+                object_id: 1,
+            };
+            tx.send(payload).unwrap();
         }
+    });
+
+    Box::into_raw(Box::new(rx))
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn start_capture_tokio_mpsc() -> *mut Receiver<Packet> {
+    let (tx, rx) = mpsc::channel::<Packet>(10);
+
+    std::thread::spawn(move || {
+        let rt = Runtime::new().expect("Failed to create Tokio runtime");
+        rt.block_on(async move {
+
+            loop {
+                sleep(Duration::from_secs(2)).await;
+                let payload = Packet::Damage {
+                    object_id: 1,
+                };
+                tx.send(payload).await.unwrap();
+
+            }
+        });
     });
 
     Box::into_raw(Box::new(rx))

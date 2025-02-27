@@ -8,7 +8,9 @@ async fn main() -> Result<()> {
 
     wrapper.start_capture();
 
-    wrapper.recv();
+    let test = wrapper.recv();
+
+    println!("{:?}", test);
 
     Ok(())
 }

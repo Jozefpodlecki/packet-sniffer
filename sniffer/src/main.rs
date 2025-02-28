@@ -6,18 +6,6 @@ use anyhow::{Result};
 use windivert::{layer::NetworkLayer, packet::WinDivertPacket, prelude::WinDivertFlags, WinDivert};
 use tokio::{select, signal::windows::{self, ctrl_c}, task};
 
-async fn recv_async(windivert: Arc<Mutex<WinDivert<NetworkLayer>>>) -> Result<WinDivertPacket<'static, NetworkLayer>> {
-
-    let result = task::spawn_blocking(move || {
-        let mut buffer = vec![0u8; 65535];
-        let mut guard = windivert.lock().unwrap();
-        guard.recv(Some(&mut buffer)).unwrap().into_owned()
-    }).await?;
-
-    Ok(result)
-    
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     let ip = "127.0.0.1"; 
@@ -51,6 +39,7 @@ async fn main() -> Result<()> {
 
                         let src_port = u16::from_be_bytes([data[20], data[21]]);
                         let dst_port = u16::from_be_bytes([data[22], data[23]]);
+                        let payload = &data[40..];
 
                         println!("Packet Captured:");
                         println!("  Source IP: {} | Source Port: {}", src_ip, src_port);

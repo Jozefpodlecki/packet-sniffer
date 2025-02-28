@@ -1,25 +1,20 @@
-use std::{thread, time::Duration};
 
-use tokio::{runtime::Runtime, sync::mpsc::{self, Receiver}, time::sleep};
+use std::{sync::mpsc::{self, Receiver}, thread, time::Duration};
 
-#[repr(C)] 
-pub enum Packet {
-    Damage {
-        object_id: i32,
-    }
-}
+use shared::{models::Packet, simulator::Simulator};
+use windivert::{prelude::WinDivertFlags, WinDivert};
 
 #[unsafe(no_mangle)]
-pub extern "C" fn start_capture() -> *mut std::sync::mpsc::Receiver<Packet> {
-    let (tx, rx) = std::sync::mpsc::channel::<Packet>();
+pub extern "C" fn start_capture_fake() -> *mut Receiver<Packet> {
+    let (tx, rx) = mpsc::channel::<Packet>();
 
     std::thread::spawn(move || {
-        loop {
+        let simulator = Simulator::new();
+
+        for packet in simulator {
             thread::sleep(Duration::from_secs(2));
-            let payload = Packet::Damage {
-                object_id: 1,
-            };
-            tx.send(payload).unwrap();
+       
+            tx.send(packet).unwrap();
         }
     });
 
@@ -27,35 +22,28 @@ pub extern "C" fn start_capture() -> *mut std::sync::mpsc::Receiver<Packet> {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn start_capture_tokio_mpsc() -> *mut Receiver<Packet> {
-    let (tx, rx) = mpsc::channel::<Packet>(10);
+pub extern "C" fn start_capture(port: i32) -> *mut Receiver<Packet> {
+    let (tx, rx) = mpsc::channel::<Packet>();
 
     std::thread::spawn(move || {
-        let rt = Runtime::new().expect("Failed to create Tokio runtime");
-        rt.block_on(async move {
+        let filter = format!("tcp.SrcPort == {port}");
+        let flags = WinDivertFlags::new().set_recv_only().set_sniff();
+        let windivert = WinDivert::network(&filter, 0, flags).unwrap();
+        let mut buffer = vec![0u8; 65535];
 
-            loop {
-                sleep(Duration::from_secs(2)).await;
-                let payload = Packet::Damage {
-                    object_id: 1,
-                };
-                tx.send(payload).await.unwrap();
+        loop {
+            let windivert_packet = windivert.recv(Some(&mut buffer)).unwrap();
+            let data = &windivert_packet.data;
 
-            }
-        });
+            let packet = to_packet(data);
+
+            tx.send(packet).unwrap();
+        }
     });
 
     Box::into_raw(Box::new(rx))
 }
 
-// #[unsafe(no_mangle)]
-// pub extern "C" fn create_struct() -> *mut MyStruct {
-//     let name = CString::new("Hello from DLL").unwrap();
-    
-//     let s = Box::new(MyStruct {
-//         value: 42,
-//         name: name.into_raw(), // Pass ownership of the string
-//     });
-
-//     Box::into_raw(s) // Pass ownership of the struct
-// }
+fn to_packet(data: &[u8]) -> Packet {
+    Packet::None
+}

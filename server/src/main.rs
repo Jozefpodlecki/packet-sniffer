@@ -4,7 +4,6 @@ use tokio::net::TcpListener;
 use anyhow::Result;
 use clap::{arg, command, Parser};
 mod utils;
-mod simulator;
 
 /// Command-line arguments for the server
 #[derive(Parser)]

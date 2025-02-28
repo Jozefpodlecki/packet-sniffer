@@ -10,6 +10,12 @@ fn main() {
     let dll_dest = bin_dir.join("sniffer_lib.dll");
 
     println!("cargo:warning={:?} to {:?}", dll_source, dll_dest);
-    fs::copy(&dll_source, &dll_dest)
-        .expect("Failed to copy DLL to target directory");
+    match fs::copy(&dll_source, &dll_dest) {
+        Ok(_) => {
+
+        },
+        Err(_) => {
+            
+        },
+    }
 }

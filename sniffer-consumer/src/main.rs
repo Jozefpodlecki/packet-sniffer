@@ -8,9 +8,9 @@ async fn main() -> Result<()> {
 
     wrapper.start_capture();
 
-    let test = wrapper.recv();
-
-    println!("{:?}", test);
+    while let Some(packet) = wrapper.recv() {
+        println!("{:?}", packet);
+    }
 
     Ok(())
 }

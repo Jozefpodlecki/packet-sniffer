@@ -5,6 +5,7 @@ use tauri_plugin_log::{Target, TargetKind};
 
 mod handlers;
 mod setup;
+mod updater;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -40,6 +41,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_single_instance::init(|_, _, _| {}))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(generate_handlers())
         .setup(setup::setup_app)
         .run(context)

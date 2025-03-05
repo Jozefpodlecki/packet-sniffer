@@ -1,3 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["app", "shared", "game/client", "game/server", "sniffer/lib"]
+members = [
+    "app",
+    "shared",
+    "game/client",
+    "game/server",
+    "sniffer/lib",
+    "sniffer/consumer"
+]

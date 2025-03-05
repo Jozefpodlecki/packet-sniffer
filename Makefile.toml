@@ -9,8 +9,19 @@ args = ["build"]
 script_runner = "powershell"
 script_extension = "ps1"
 script = '''
-Copy-Item sniffer\lib\\target\\debug\\sniffer_lib.dll sniffer\\consumer\\sniffer_lib.dll
-Copy-Item sniffer\\consumer\\sniffer_lib.dll sniffer\\consumer\\target\\debug\\sniffer_lib.dll
+$source = "sniffer\lib\target\debug\sniffer_lib.dll"
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$destination_root = "sniffer\consumer\sniffer_lib.dll"
+$destination_target = "sniffer\consumer\target\debug\sniffer_lib.dll"
+
+# $destination_root = "sniffer\consumer\sniffer_lib_$timestamp.dll"
+# $destination_target = "sniffer\consumer\target\debug\sniffer_lib_$timestamp.dll"
+
+Remove-Item -Force $destination_root -ErrorAction SilentlyContinue
+Remove-Item -Force $destination_target -ErrorAction SilentlyContinue
+
+Copy-Item $source $destination_root
+Copy-Item $destination_root $destination_target
 '''
 
 [tasks.build_and_copy]

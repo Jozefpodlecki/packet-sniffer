@@ -21,6 +21,7 @@
     }
   },
   "bundle": {
+    "createUpdaterArtifacts": true,
     "active": true,
     "targets": "all",
     "icon": [
@@ -30,5 +31,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJFODY2MkQxRkRGQUNFRkIKUldUN3p2cjkwV0tHTHRKemo5WlhIRnpWZEVlTW1QcXRuNmZ1K2tCT3FyMjZxNXJla29aeUsrMzYK",
+      "endpoints": [
+        "https://github.com/Jozefpodlecki/packet-sniffer/releases/latest/download/latest.json"
+      ]
+    }
   }
 }

@@ -12,17 +12,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Cache
-        id: cache-web
-        uses: actions/cache@v4
+      - uses: actions/setup-node@v4
         with:
-          path: |
-            web/node_modules
-          key: ${{ runner.os }}-build-${{ hashFiles('**/web/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          node-version: '22'
+          cache-dependency-path: web/package-lock.json
+          cache: 'npm'
+
+      - run: |
+          cd web
+          npm ci
+          npm run build
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+
+      - name: Build and Release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          includeRelease: true
+          tagName: ${{ github.ref_name }}
+          releaseName: "Release ${{ github.ref_name }}"
+          releaseBody: "See the assets below to download this version and install."
+          releaseDraft: false
+          prerelease: false
 
       # - name: Setup Pages
       #   uses: actions/configure-pages@v3

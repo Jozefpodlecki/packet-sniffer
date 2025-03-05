@@ -1,9 +1,7 @@
-mod models;
-
 use std::sync::{mpsc::Receiver, Arc};
 
 use libloading::{Library, Symbol};
-use models::Packet;
+use shared::models::Packet;
 
 type StartCaptureFn = unsafe extern "C" fn() -> *mut Receiver<Packet>;
 
@@ -14,6 +12,8 @@ pub struct Wrapper {
 
 impl Wrapper {
     pub fn new() -> Self {
+
+
         let lib = unsafe { Library::new("sniffer_lib.dll").unwrap() };
 
         Self {

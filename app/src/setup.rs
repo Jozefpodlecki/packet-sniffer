@@ -3,6 +3,8 @@ use tauri::{App, Emitter, Listener, Manager};
 use tokio::{runtime::Runtime, time::{sleep, Duration}};
 use serde::{Deserialize, Serialize};
 
+use crate::updater;
+
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
@@ -23,7 +25,26 @@ pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
     let version = app_handle.package_info().version.to_string();
 
     // let window = app_handle.get_webview_window("main").unwrap();
-    println!("spawn_blocking");
+    {
+        let app_handle = app_handle.clone();
+        // tokio::task::spawn(async move {
+        //     match updater::update(app_handle).await {
+        //         Ok(_) => {},
+        //         Err(err) => {
+        //             println!("{:?}", err);
+        //         },
+        //     }
+        // });
+
+        tauri::async_runtime::spawn(async move {
+            match updater::update(app_handle).await {
+                Ok(_) => {},
+                Err(err) => {
+                    println!("{:?}", err);
+                },
+            }
+        });
+    }
 
     thread::spawn(move || {
         let mut rt = Runtime::new().unwrap();

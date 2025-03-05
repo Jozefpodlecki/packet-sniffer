@@ -1,10 +1,10 @@
 {
-  "name": "packet-sniffer",
-  "version": "0.1.0",
-  "description": "",
-  "type": "module",
-  "scripts": {
-    "dev": "vite dev",
+	"name": "packet-sniffer",
+	"version": "0.1.0",
+	"description": "",
+	"type": "module",
+	"scripts": {
+	"dev": "vite dev",
 	"build": "vite build",
 	"preview": "vite preview",
 	"prepare": "svelte-kit sync || echo ''",
@@ -15,17 +15,18 @@
 	"test:unit": "vitest",
 	"test": "npm run test:unit -- --run && npm run test:e2e",
 	"test:e2e": "playwright test"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-shell": "^2"
-  },
-  "devDependencies": {
-    "@eslint/compat": "^1.2.5",
+	},
+	"license": "MIT",
+	"dependencies": {
+	"@tauri-apps/api": "^2",
+	"@tauri-apps/plugin-shell": "^2"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
 		"@playwright/test": "^1.49.1",
 		"@sveltejs/adapter-auto": "^4.0.0",
+		"@sveltejs/adapter-static": "^3.0.6",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/vite": "^4.0.0",

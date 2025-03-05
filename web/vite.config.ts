@@ -27,6 +27,7 @@ export default defineConfig({
 		ignored: ["**/src-tauri/**"],
 	  },
 	},
+	envPrefix: ['VITE_', 'TAURI_ENV_*'],
 	test: {
 		workspace: [
 			{

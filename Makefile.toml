@@ -1,0 +1,24 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = "true"
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+
+[tasks.copy_dll]
+script_runner = "powershell"
+script_extension = "ps1"
+script = '''
+Copy-Item sniffer\lib\\target\\debug\\sniffer_lib.dll sniffer\\consumer\\sniffer_lib.dll
+Copy-Item sniffer\\consumer\\sniffer_lib.dll sniffer\\consumer\\target\\debug\\sniffer_lib.dll
+'''
+
+[tasks.build_and_copy]
+dependencies = [
+    "build",
+    "copy_dll"
+]
+
+[tasks.run_wrapper]
+command = "cargo"
+args = ["run", "-p", "wrapper"]

@@ -1,2 +1,21 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+    import { invoke,  } from "@tauri-apps/api/core";
+    import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+	import { onDestroy, onMount } from "svelte";
+    let handle: UnlistenFn;
+
+    onMount(() => {
+        onLoad()
+    });
+
+    onDestroy(() => {
+        handle && handle();
+    })
+
+    async function onLoad() {
+        console.log("onload");
+        handle = await listen("update", (payload) => {
+            console.log(payload);
+        });
+    }
+</script>

@@ -10,7 +10,8 @@
   "app": {
     "windows": [
       {
-        "title": "packet-sniffer",
+        "label": "main",
+        "title": "Packet Sniffer",
         "width": 800,
         "height": 600
       }

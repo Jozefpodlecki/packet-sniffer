@@ -3,15 +3,16 @@ name: CI - Build & Test
 
 on:
   push:
-    branches: ["main"]
+    tags:
+      - 'v*.*.*' 
 
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
     permissions:
       contents: write
+    runs-on: windows-latest
     environment: github
     steps:
       - uses: actions/checkout@v4
@@ -40,28 +41,3 @@ jobs:
           releaseBody: "See the assets below to download this version and install."
           releaseDraft: false
           prerelease: false
-
-      # - name: Setup Pages
-      #   uses: actions/configure-pages@v3
-
-      # - name: Install cargo-llvm-cov
-      #   uses: taiki-e/install-action@cargo-llvm-cov
-        
-      # - name: code coverage
-      #   run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
-      #   working-directory: ./game
-
-      # - name: push to codecov
-      #   uses: codecov/codecov-action@v5
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     files: ./game/lcov.info
-
-      # - name: Upload artifact
-      #   uses: actions/upload-pages-artifact@v3
-      #   with:
-      #     path: "./web/dist"
-
-  # deploy:
-  #   needs: build
-  #   uses: ./.github/workflows/gh-pages.yml

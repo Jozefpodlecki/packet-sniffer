@@ -24,7 +24,7 @@ jobs:
           npm run build
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.85.0
 
       - name: Build and Release
         uses: tauri-apps/tauri-action@v0

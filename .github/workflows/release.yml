@@ -28,7 +28,6 @@ jobs:
           npm run build
 
       - uses: dtolnay/rust-toolchain@1.85.0
-
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

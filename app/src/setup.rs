@@ -1,16 +1,7 @@
-use std::{error::Error, thread};
-use tauri::{App, Emitter, Listener, Manager};
-use tokio::{runtime::Runtime, time::{sleep, Duration}};
-use serde::{Deserialize, Serialize};
+use std::error::Error;
+use tauri::{App, Manager};
 
-use crate::updater;
-
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", default)]
-pub struct Payload {
-    id: i32
-}
+use crate::{background_worker::{self, BackgroundWorker}, updater};
 
 pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
 
@@ -46,22 +37,10 @@ pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
         });
     }
 
-    thread::spawn(move || {
-        let mut rt = Runtime::new().unwrap();
-        
-        loop {
-            let payload = Payload {
-                id: 1
-            };
 
-            app_handle.emit("update", payload).unwrap();
+    let mut background_worker = BackgroundWorker::new(app_handle.clone());
 
-            rt.block_on(async move {
-                sleep(Duration::from_secs(1)).await    
-            });
-        }
-    });
-    
+    background_worker.run();
 
     Ok(())
 }

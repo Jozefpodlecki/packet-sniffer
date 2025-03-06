@@ -26,20 +26,19 @@ jobs:
           npm ci
           npm run build
 
-      - uses: dtolnay/rust-toolchain@1.85.0
-
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        with:
-          includeRelease: true
-          tagName: ${{ github.ref_name }}
-          releaseName: "Release ${{ github.ref_name }}"
-          releaseBody: "See the assets below to download this version and install."
-          releaseDraft: false
-          prerelease: false
+      # - uses: dtolnay/rust-toolchain@1.85.0
+      # - uses: tauri-apps/tauri-action@v0
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      #     TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      #   with:
+      #     includeRelease: true
+      #     tagName: ${{ github.ref_name }}
+      #     releaseName: "Release ${{ github.ref_name }}"
+      #     releaseBody: "See the assets below to download this version and install."
+      #     releaseDraft: false
+      #     prerelease: false
 
       # - name: Setup Pages
       #   uses: actions/configure-pages@v3

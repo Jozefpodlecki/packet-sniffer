@@ -1,5 +1,5 @@
-use std::error::Error;
-use tauri::{App, Manager};
+use std::{error::Error, sync::{Arc, Mutex}};
+use tauri::{App, Listener, Manager};
 
 use crate::{background_worker::{self, BackgroundWorker}, updater};
 
@@ -37,9 +37,18 @@ pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
         });
     }
 
+    let background_worker = Arc::new(Mutex::new(BackgroundWorker::new(app_handle.clone())));
 
-    let mut background_worker = BackgroundWorker::new(app_handle.clone());
+    {
+        let background_worker = background_worker.clone();
+        app_handle.listen_any("restart", move |event| {
+            let mut background_worker = background_worker.lock().unwrap();
+            background_worker.stop().unwrap();
+        });
+    }
+    
 
+    let mut background_worker = background_worker.lock().unwrap();
     background_worker.run();
 
     Ok(())

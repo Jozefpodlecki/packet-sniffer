@@ -1,5 +1,5 @@
 use std::{error::Error, sync::{Arc, Mutex}};
-use tauri::{App, Listener, Manager};
+use tauri::{App, Emitter, Listener, Manager};
 
 use crate::{background_worker::{self, BackgroundWorker}, updater};
 
@@ -18,14 +18,6 @@ pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
     // let window = app_handle.get_webview_window("main").unwrap();
     {
         let app_handle = app_handle.clone();
-        // tokio::task::spawn(async move {
-        //     match updater::update(app_handle).await {
-        //         Ok(_) => {},
-        //         Err(err) => {
-        //             println!("{:?}", err);
-        //         },
-        //     }
-        // });
 
         tauri::async_runtime::spawn(async move {
             match updater::update(app_handle).await {
@@ -41,15 +33,28 @@ pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
 
     {
         let background_worker = background_worker.clone();
-        app_handle.listen_any("restart", move |event| {
+        let app_handle_inner = app_handle.clone();
+        app_handle.listen_any("start", move |event| {
+            let mut background_worker = background_worker.lock().unwrap();
+            background_worker.run();
+            app_handle_inner.emit("onchange", "start").unwrap();
+        });
+    }
+
+    {
+        let background_worker = background_worker.clone();
+        let app_handle_inner = app_handle.clone();
+        app_handle.listen_any("stop", move |event| {
             let mut background_worker = background_worker.lock().unwrap();
             background_worker.stop().unwrap();
+            app_handle_inner.emit("onchange", "stop").unwrap();
         });
     }
     
 
     let mut background_worker = background_worker.lock().unwrap();
     background_worker.run();
+    app_handle.emit("onchange", "start").unwrap();
 
     Ok(())
 }

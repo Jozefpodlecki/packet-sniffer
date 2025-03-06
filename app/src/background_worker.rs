@@ -21,6 +21,10 @@ impl BackgroundWorker {
     }
 
     pub fn run(&mut self) {
+        if self.is_running.load(Ordering::Relaxed) {
+            return;
+        }
+
         let app_handle = self.app_handle.clone();
         self.is_running.store(true, Ordering::Relaxed);
         let is_running = Arc::clone(&self.is_running);
@@ -51,4 +55,3 @@ impl BackgroundWorker {
         Ok(())
     }
 }
-

@@ -5,3 +5,15 @@ use serde::{Deserialize, Serialize};
 pub struct Payload {
     pub id: i32
 }
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct Settings {
+
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct LoadResult {
+    pub settings: Settings
+}

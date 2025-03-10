@@ -1,5 +1,17 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@plugin "daisyui";
+
+html, body {
+    height: 100%;
+}
 
 body {
     background-color: black;
+    color: white;
+}
+
+.font-bsi {
+    font-family: "Big Shoulders Inline", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }

@@ -14,6 +14,12 @@
         "title": "Packet Sniffer",
         "width": 800,
         "height": 600
+      },
+      {
+        "label": "overview",
+        "title": "Overview",
+        "width": 800,
+        "height": 600
       }
     ],
     "security": {

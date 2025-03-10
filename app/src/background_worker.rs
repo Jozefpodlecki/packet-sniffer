@@ -1,7 +1,7 @@
 use std::{sync::{atomic::{AtomicBool, Ordering}, Arc}, thread::{self, JoinHandle}};
 use anyhow::{Result, Ok};
 use tauri::{AppHandle, Emitter};
-use tokio::{io::Join, runtime::Runtime, time::{sleep, Duration}};
+use tokio::{runtime::Runtime, time::{sleep, Duration}};
 
 use crate::models::Payload;
 
@@ -30,7 +30,7 @@ impl BackgroundWorker {
         let is_running = Arc::clone(&self.is_running);
 
         let handle = thread::spawn(move || {
-            let mut rt = Runtime::new().unwrap();
+            let rt = Runtime::new().unwrap();
             
             while is_running.load(Ordering::Relaxed) {
                 let payload = Payload { id: 1 };

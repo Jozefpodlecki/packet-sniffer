@@ -1,12 +1,12 @@
-export type AppState = {
-    isLoading: false;
-    settings: Settings;
-} | {
-    isLoading: true;
-};
+export interface AppState {
+    isLoading: boolean;
+    version: String;
+    githubUrl: String;
+}
 
 export interface LoadResult {
-    settings: Settings
+    version: String;
+    githubUrl: String;    
 }
 
 export interface Settings {

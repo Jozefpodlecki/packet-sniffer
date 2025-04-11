@@ -1,7 +1,7 @@
 use std::{error::Error, sync::{Arc, Mutex}};
 use tauri::{App, Emitter, Listener, Manager};
 
-use crate::{background_worker::{self, BackgroundWorker}, updater};
+use crate::services::{AppStartupLatch, BackgroundWorker};
 
 pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
 
@@ -16,45 +16,17 @@ pub fn setup_app(app: &mut App) -> Result<(), Box<dyn Error>> {
     let version = app_handle.package_info().version.to_string();
 
     // let window = app_handle.get_webview_window("main").unwrap();
-    {
-        let app_handle = app_handle.clone();
+    let app_startup_latch: Arc<AppStartupLatch> = Arc::new(AppStartupLatch::new());
+    let mut background_worker = BackgroundWorker::new(
+        app_startup_latch.clone(),
+        app_handle.clone());
 
-        tauri::async_runtime::spawn(async move {
-            match updater::update(app_handle).await {
-                Ok(_) => {},
-                Err(err) => {
-                    println!("{:?}", err);
-                },
-            }
-        });
-    }
-
-    let background_worker = Arc::new(Mutex::new(BackgroundWorker::new(app_handle.clone())));
-
-    {
-        let background_worker = background_worker.clone();
-        let app_handle_inner = app_handle.clone();
-        app_handle.listen_any("start", move |event| {
-            let mut background_worker = background_worker.lock().unwrap();
-            background_worker.run();
-            app_handle_inner.emit("onchange", "start").unwrap();
-        });
-    }
-
-    {
-        let background_worker = background_worker.clone();
-        let app_handle_inner = app_handle.clone();
-        app_handle.listen_any("stop", move |event| {
-            let mut background_worker = background_worker.lock().unwrap();
-            background_worker.stop().unwrap();
-            app_handle_inner.emit("onchange", "stop").unwrap();
-        });
-    }
-    
-
-    let mut background_worker = background_worker.lock().unwrap();
     background_worker.run();
-    app_handle.emit("onchange", "start").unwrap();
+
+    let background_worker = Arc::new(Mutex::new(background_worker));    
+
+    app.manage(app_startup_latch.clone());
+    app.manage(background_worker.clone());
 
     Ok(())
 }

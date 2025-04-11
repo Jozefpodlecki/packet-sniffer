@@ -14,13 +14,9 @@ export async function stopCapturing() {
 
 
 export async function load(): Promise<LoadResult> {
-    // const result = await invoke<LoadResult>("load");
+    const result = await invoke<LoadResult>("load");
 
-    return {
-        settings: {
-            
-        }
-    }
+    return result;
 }
 
 export async function onUpdate(handler: () => void): Promise<UnlistenFn> {

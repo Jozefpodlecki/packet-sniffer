@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useAppState } from '$lib/appState';
-	import Landing from '$lib/components/Landing.svelte';
+	import Loading from '$lib/components/Loading.svelte';
 	import Provider from '$lib/components/Provider.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	
@@ -11,7 +11,7 @@
 
 <Provider>
 	{#if $appState.isLoading }
-		<Landing></Landing>
+		<Loading/>
 	{:else}
 		<div class="flex">
 			<Sidebar/>

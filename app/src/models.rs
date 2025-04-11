@@ -15,5 +15,6 @@ pub struct Settings {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct LoadResult {
-    pub settings: Settings
+    pub version: String,
+    pub github_url: String,
 }

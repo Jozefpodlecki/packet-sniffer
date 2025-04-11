@@ -1,19 +1,26 @@
 use std::{sync::{atomic::{AtomicBool, Ordering}, Arc}, thread::{self, JoinHandle}};
 use anyhow::{Result, Ok};
+use log::debug;
 use tauri::{AppHandle, Emitter};
 use tokio::{runtime::Runtime, time::{sleep, Duration}};
 
 use crate::models::Payload;
 
+use super::AppStartupLatch;
+
 pub struct BackgroundWorker {
+    app_startup_latch: Arc<AppStartupLatch>,
     app_handle: AppHandle,
     handle: Option<JoinHandle<()>>,
     is_running: Arc<AtomicBool>,
 }
 
 impl BackgroundWorker {
-    pub fn new(app_handle: AppHandle) -> Self {
+    pub fn new(
+        app_startup_latch: Arc<AppStartupLatch>,
+            app_handle: AppHandle) -> Self {
         BackgroundWorker {
+            app_startup_latch,
             app_handle,
             handle: None,
             is_running: Arc::new(AtomicBool::new(false)), 
@@ -25,24 +32,33 @@ impl BackgroundWorker {
             return;
         }
 
-        let app_handle = self.app_handle.clone();
         self.is_running.store(true, Ordering::Relaxed);
+        let app_handle = self.app_handle.clone();
+        let app_startup_latch = self.app_startup_latch.clone();
+        
         let is_running = Arc::clone(&self.is_running);
 
         let handle = thread::spawn(move || {
-            let rt = Runtime::new().unwrap();
+            debug!("Waiting for app load.");
+            app_startup_latch.wait_for_ready();
+            debug!("Starting loop.");
+            Self::thread_loop(is_running, app_handle);
+        });
+
+        self.handle = Some(handle);
+    }
+
+    fn thread_loop(is_running: Arc<AtomicBool>, app_handle: AppHandle) {
+        let rt = Runtime::new().unwrap();
             
+        rt.block_on(async {
             while is_running.load(Ordering::Relaxed) {
                 let payload = Payload { id: 1 };
                 app_handle.emit("update", payload).unwrap();
 
-                rt.block_on(async {
-                    sleep(Duration::from_secs(1)).await;
-                });
-            }
+                
+            }    
         });
-
-        self.handle = Some(handle);
     }
 
     pub fn stop(&mut self) -> Result<()> {

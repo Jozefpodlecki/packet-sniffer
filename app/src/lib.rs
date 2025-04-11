@@ -1,18 +1,18 @@
 use handlers::generate_handlers;
+use hook::set_hook;
 use log::error;
 use tauri::generate_context;
 use tauri_plugin_log::{Target, TargetKind};
 
 mod handlers;
 mod setup;
-mod updater;
-mod background_worker;
 mod models;
 mod hook;
+mod services;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-
+    set_hook();
 
     let context = generate_context!();
 

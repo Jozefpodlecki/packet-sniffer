@@ -5,10 +5,13 @@
     import { writable } from 'svelte/store';
 	import { setAppState } from '$lib/appState';
 	import { type AppState } from '$lib/types';
+	import TemperatureMinus from '@tabler/icons-svelte/icons/temperature-minus';
 
     const { children } = $props();
     const appState = writable<AppState>({
-        isLoading: true
+        isLoading: true,
+        version: "",
+        githubUrl: ""
     });
 
     onMount(() => {

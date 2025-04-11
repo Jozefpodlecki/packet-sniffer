@@ -4,12 +4,11 @@ use log::debug;
 use tauri::{AppHandle, Emitter};
 use tokio::{runtime::Runtime, time::{sleep, Duration}};
 
-use crate::models::Payload;
-
-use super::AppStartupLatch;
+use super::{AppStartupLatch, Processor};
 
 pub struct BackgroundWorker {
     app_startup_latch: Arc<AppStartupLatch>,
+    processor: Arc<Processor>,
     app_handle: AppHandle,
     handle: Option<JoinHandle<()>>,
     is_running: Arc<AtomicBool>,
@@ -18,9 +17,11 @@ pub struct BackgroundWorker {
 impl BackgroundWorker {
     pub fn new(
         app_startup_latch: Arc<AppStartupLatch>,
-            app_handle: AppHandle) -> Self {
+        processor: Arc<Processor>,
+        app_handle: AppHandle) -> Self {
         BackgroundWorker {
             app_startup_latch,
+            processor,
             app_handle,
             handle: None,
             is_running: Arc::new(AtomicBool::new(false)), 
@@ -35,28 +36,35 @@ impl BackgroundWorker {
         self.is_running.store(true, Ordering::Relaxed);
         let app_handle = self.app_handle.clone();
         let app_startup_latch = self.app_startup_latch.clone();
-        
+        let processor = self.processor.clone();
+
         let is_running = Arc::clone(&self.is_running);
 
         let handle = thread::spawn(move || {
             debug!("Waiting for app load.");
             app_startup_latch.wait_for_ready();
             debug!("Starting loop.");
-            Self::thread_loop(is_running, app_handle);
+            Self::thread_loop(is_running, processor, app_handle);
         });
 
         self.handle = Some(handle);
     }
 
-    fn thread_loop(is_running: Arc<AtomicBool>, app_handle: AppHandle) {
+    fn thread_loop(
+        is_running: Arc<AtomicBool>,
+        processor: Arc<Processor>,
+        app_handle: AppHandle
+        ) {
         let rt = Runtime::new().unwrap();
             
         rt.block_on(async {
             while is_running.load(Ordering::Relaxed) {
-                let payload = Payload { id: 1 };
-                app_handle.emit("update", payload).unwrap();
 
-                
+                let encounter = processor.tick();
+
+                app_handle.emit("encounter-update", encounter).unwrap();
+
+                sleep(Duration::from_secs(1)).await;
             }    
         });
     }

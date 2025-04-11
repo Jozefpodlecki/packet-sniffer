@@ -33,6 +33,6 @@ serde_with = "3.5.1"
 serde_json = "1"
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
 sysinfo = "0.33.1"
-chrono = "0.4.31"
+chrono = { version = "0.4.38", features = ["serde"] }
 log = "0.4.22"
 netstat2 = "0.11.1"

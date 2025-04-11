@@ -2,9 +2,6 @@
 	"svelte.enable-ts-plugin": true,
 	"rust-analyzer.linkedProjects": [
 		"app/Cargo.toml",
-		"game/client/Cargo.toml",
-		"sniffer/lib/Cargo.toml",
-		"sniffer/consumer/Cargo.toml",
 		"shared/Cargo.toml",
 	]
 }

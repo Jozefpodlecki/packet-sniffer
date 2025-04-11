@@ -2,9 +2,7 @@ use tauri::AppHandle;
 use tauri_plugin_updater::{UpdaterExt, Result};
 
 pub async fn update(app: AppHandle) -> Result<()> {
-    println!("updater");
     let updater = app.updater()?;
-    println!("check");
     let check_result = updater.check().await?;
 
     if let Some(update) = check_result {

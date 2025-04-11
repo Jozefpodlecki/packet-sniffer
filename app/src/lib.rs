@@ -8,25 +8,11 @@ mod setup;
 mod updater;
 mod background_worker;
 mod models;
+mod hook;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    std::panic::set_hook(Box::new(|info| {
-        let payload = info.payload();
-        let message = if let Some(s) = payload.downcast_ref::<&str>() {
-            s.to_string()
-        } else if let Some(s) = payload.downcast_ref::<String>() {
-            s.clone()
-        } else {
-            "Unknown panic message".to_string()
-        };
 
-        let location = info.location().map_or("unknown location".to_string(), |location| {
-            format!("{}:{}", location.file(), location.line())
-        });
-
-        error!("Panicked at '{}', {}", message, location);
-    }));
 
     let context = generate_context!();
 

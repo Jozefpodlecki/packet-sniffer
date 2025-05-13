@@ -7,6 +7,7 @@ use anyhow::*;
 mod utils;
 mod consumer;
 mod processor;
+mod packet_info;
 
 #[tokio::main]
 async fn main() -> Result<()> {

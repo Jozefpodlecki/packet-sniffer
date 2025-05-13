@@ -1,4 +1,4 @@
-use std::{fs::{File, OpenOptions}, io::{BufWriter, Write as WriteIO}, path::Path};
+use std::{fs::{self, File, OpenOptions}, io::{BufWriter, Write as WriteIO}, path::Path};
 
 use anyhow::*;
 use chrono::Local;
@@ -15,6 +15,11 @@ pub struct PacketInfo {
 
 impl PacketInfo {
     pub fn new(op_code: u16, length: u32) -> Self {
+        if Path::new("dump").exists() {
+            if let Err(e) = fs::remove_dir_all("dump") {
+                eprintln!("Failed to remove dump folder: {}", e);
+            }
+        }
         std::fs::create_dir_all("dump").expect("Failed to create dump folder");
 
         let timestamp = Local::now().format("%Y%m%d%H%M%S");
@@ -40,9 +45,8 @@ impl PacketInfo {
         self.count += 1;
         self.min_length = self.min_length.min(length);
         self.max_length = self.max_length.max(length);
-        let mut hex_buf = vec![0u8; data.len() * 2];
-        hex::encode_to_slice(data, &mut hex_buf)?;
-        self.file.write_all(&hex_buf)?;
+        let hex_str = hex::encode_upper(&data[6..]);
+        self.file.write_all(hex_str.as_bytes())?;
         self.file.write_all(b"\r\n")?;
         Ok(())
     }

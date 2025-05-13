@@ -74,8 +74,14 @@ impl Processor {
         info.update(length, &data)?;
 
         self.buffer.clear();
-        for (op_code, info) in self.op_codes.iter() {
-            write!(self.buffer, "{}: {}..{} - {}\n", op_code, info.min_length, info.max_length, info.count)?;
+
+        let mut sorted_op_codes: Vec<_> = self.op_codes.iter()
+            .collect();
+
+        sorted_op_codes.sort_by(|a, b| b.1.count.cmp(&a.1.count));
+
+        for (_, info) in self.op_codes.iter() {
+            write!(self.buffer, "opcode: {}: size: {}..{}: count {}\n", info.op_code_hex, info.min_length, info.max_length, info.count)?;
         }
 
         self.std_out

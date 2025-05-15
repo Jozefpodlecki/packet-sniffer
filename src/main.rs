@@ -1,11 +1,10 @@
 
+use args::CommandLineArgs;
+use clap::Parser;
 use log::*;
-use opcode_tracker_handler::OpcodeTrackerHandler;
-use packet_handler::PacketHandler;
 use processor::Processor;
-use raw_dump_handler::RawDumpHandler;
 use simple_logger::SimpleLogger;
-use utils::{pause, prepare_dump_folder};
+use utils::pause;
 use anyhow::*;
 
 mod utils;
@@ -15,18 +14,22 @@ mod packet_info;
 mod opcode_tracker_handler;
 mod raw_dump_handler;
 mod packet_handler;
+mod args;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     
     SimpleLogger::new().env().init()?;
-
+    let args = match CommandLineArgs::try_parse() {
+        std::result::Result::Ok(args) => args,
+        Err(err) => {
+            error!("{}", err);
+            pause();
+            std::process::exit(1);
+        }
+    };
     
-    let file_path = "dump.bin";
-    let handler: Box<dyn PacketHandler> = Box::new(RawDumpHandler::new(file_path)?);
-
-    let folder_name = prepare_dump_folder()?;
-    let handler: Box<dyn PacketHandler> = Box::new(OpcodeTrackerHandler::new(folder_name));
+    let handler = args.create_handler()?;
     let mut processor = Processor::new(handler);
 
     match processor.run().await {

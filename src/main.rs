@@ -1,32 +1,33 @@
-use std::{fs, path::Path};
 
-use chrono::Local;
 use log::*;
+use opcode_tracker_handler::OpcodeTrackerHandler;
+use packet_handler::PacketHandler;
 use processor::Processor;
+use raw_dump_handler::RawDumpHandler;
 use simple_logger::SimpleLogger;
-use utils::pause;
+use utils::{pause, prepare_dump_folder};
 use anyhow::*;
 
 mod utils;
 mod consumer;
 mod processor;
 mod packet_info;
+mod opcode_tracker_handler;
+mod raw_dump_handler;
+mod packet_handler;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     
-    SimpleLogger::new().env().init().unwrap();
+    SimpleLogger::new().env().init()?;
 
-    // if Path::new("dump").exists() {
-    //     if let Err(e) = fs::remove_dir_all("dump") {
-    //         eprintln!("Failed to remove dump folder: {}", e);
-    //     }
-    // }
-    let timestamp = Local::now().format("%Y%m%d%H%M%S");
-    let folder_name = format!("dump_{}", timestamp);
-    std::fs::create_dir_all(&folder_name).expect("Failed to create dump folder");
+    
+    let file_path = "dump.bin";
+    let handler: Box<dyn PacketHandler> = Box::new(RawDumpHandler::new(file_path)?);
 
-    let mut processor = Processor::new(folder_name);
+    let folder_name = prepare_dump_folder()?;
+    let handler: Box<dyn PacketHandler> = Box::new(OpcodeTrackerHandler::new(folder_name));
+    let mut processor = Processor::new(handler);
 
     match processor.run().await {
         std::result::Result::Ok(_) => {

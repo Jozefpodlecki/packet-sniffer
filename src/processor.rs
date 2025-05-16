@@ -1,17 +1,20 @@
-use crate::packet_handler::PacketHandler;
+use crate::{data_source::DataSource, packet_handler::PacketHandler};
 
 pub struct Processor {
+    source: Box<dyn DataSource>,
     handler: Box<dyn PacketHandler>,
 }
 
 impl Processor {
-    pub fn new(handler: Box<dyn PacketHandler>) -> Self {
-        Self { handler }
+    pub fn new(
+        source: Box<dyn DataSource>,
+        handler: Box<dyn PacketHandler>) -> Self {
+        Self { source, handler }
     }
 
     pub async fn run(&mut self) -> anyhow::Result<()> {
-        let mut consumer = crate::consumer::Consumer::new();
-        let mut rx = consumer.start().await?;
+    
+        let mut rx = self.source.start().await?;
 
         loop {
             tokio::select! {
@@ -28,7 +31,7 @@ impl Processor {
             }
         }
 
-        consumer.stop()?;
+        self.source.stop()?;
         self.handler.flush_all();
 
         Ok(())

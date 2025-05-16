@@ -1,30 +1,24 @@
-use std::{fs::File, io::BufReader, net::{Ipv4Addr, Ipv6Addr}, path::Path, sync::{atomic::AtomicBool, Arc}, thread::JoinHandle};
+use std::{sync::{atomic::AtomicBool, Arc}, thread::JoinHandle};
 use anyhow::{Ok, Result};
-use etherparse::{NetHeaders, PacketHeaders, TransportHeader};
+use async_trait::async_trait;
+use etherparse::PacketHeaders;
 use log::*;
-use tokio::{runtime::Runtime, sync::{mpsc::{UnboundedReceiver, UnboundedSender}, watch}, task::{self}};
+use tokio::{runtime::Runtime, sync::{mpsc::UnboundedSender, watch}, task::{self}};
 use windivert::{prelude::WinDivertFlags, WinDivert};
 use std::thread::spawn;
 
-pub struct Consumer {
+use crate::data_source::{DataSource, Receiver};
+
+#[derive(Debug)]
+pub struct WindivertSource {
     handle: Option<JoinHandle<Result<()>>>,
     shutdown: Arc<AtomicBool>,
     shutdown_tx: Option<watch::Sender<()>>,
 }
 
-impl Consumer {
-    pub fn new() -> Self {
-        let shutdown = Arc::new(AtomicBool::new(false));
-
-        Self {
-            handle: None,
-            shutdown,
-            shutdown_tx: None
-        }
-    }
-
-    pub async fn start(&mut self) -> Result<UnboundedReceiver<Vec<u8>>> {
-   
+#[async_trait]
+impl DataSource for WindivertSource {
+    async fn start(&mut self) -> Result<Receiver> {
         let (shutdown_tx, shutdown_rx) = watch::channel(());
         self.shutdown_tx = Some(shutdown_tx);
 
@@ -35,6 +29,32 @@ impl Consumer {
         self.handle = Some(handle);
 
         Ok(rx)
+    }
+
+    fn stop(&mut self) -> Result<()> {
+        if let Some(tx) = self.shutdown_tx.take() {
+            let _ = tx.send(());
+        }
+
+        if let Some(handle) = self.handle.take() {
+            if let Err(err) = handle.join() {
+                error!("Error stopping thread: {:?}", err);
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl WindivertSource {
+    pub fn new() -> Self {
+        let shutdown = Arc::new(AtomicBool::new(false));
+
+        Self {
+            handle: None,
+            shutdown,
+            shutdown_tx: None
+        }
     }
 
     pub fn thread_loop(tx: UnboundedSender<Vec<u8>>, mut shutdown_rx: watch::Receiver<()>) -> Result<()> {
@@ -96,19 +116,5 @@ impl Consumer {
         })?;
 
         anyhow::Ok(())
-    }
-
-    pub fn stop(&mut self) -> Result<()> {
-        if let Some(tx) = self.shutdown_tx.take() {
-            let _ = tx.send(());
-        }
-
-        if let Some(handle) = self.handle.take() {
-            if let Err(err) = handle.join() {
-                error!("Error stopping thread: {:?}", err);
-            }
-        }
-
-        Ok(())
     }
 }

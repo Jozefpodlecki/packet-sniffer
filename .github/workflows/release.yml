@@ -1,0 +1,25 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+
+jobs:
+  release:
+    name: release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo build --release
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "target/release/packet-sniffer.exe"
+          tag: ${{ github.event.inputs.tag }}

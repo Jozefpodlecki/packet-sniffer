@@ -16,6 +16,7 @@ use crossterm::{
 
 use crate::{packet_handler::PacketHandler, packet_info::PacketInfo};
 
+#[derive(Debug)]
 pub struct OpcodeTrackerHandler {
     std_out: Stdout,
     last_redraw: Instant,

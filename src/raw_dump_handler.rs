@@ -8,6 +8,7 @@ use anyhow::Result;
 
 use crate::packet_handler::PacketHandler;
 
+#[derive(Debug)]
 pub struct RawDumpHandler {
     file: File,
 }
@@ -21,11 +22,9 @@ impl RawDumpHandler {
 
 impl PacketHandler for RawDumpHandler {
     fn handle(&mut self, data: Vec<u8>) -> Result<()> {
-        // Write length prefix (u32 LE)
         let length = data.len() as u32;
         self.file.write_all(&length.to_le_bytes())?;
 
-        // Write raw packet bytes
         self.file.write_all(&data)?;
         Ok(())
     }

@@ -56,7 +56,7 @@ impl DataSource for FileDataSource {
 
                 let len = match reader.read_u32::<LittleEndian>() {
                     Ok(n) => n as usize,
-                    Err(_) => break, // Reached end of file
+                    Err(_) => break,
                 };
 
                 let mut buffer = vec![0u8; len];

@@ -18,11 +18,15 @@ mod packet_handler;
 mod data_source;
 mod args;
 
+fn get_name<T>(_: &T) -> &'static str {
+    std::any::type_name::<T>()
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     
-    Logger::try_with_str("info")?
-        .log_to_file(FileSpec::default())
+    Logger::try_with_str("debug")?
+        // .log_to_file(FileSpec::default())
         .duplicate_to_stderr(Duplicate::Warn)
         .start()?;
     let args = match CommandLineArgs::try_parse() {
@@ -34,7 +38,6 @@ async fn main() -> Result<()> {
         }
     };
     
-
     let source = args.create_data_source()?;
     let handler = args.create_handler()?;
     let mut processor = Processor::new(source, handler);
@@ -44,7 +47,6 @@ async fn main() -> Result<()> {
             debug!("main:run:Ok");
         },
         Err(err) => {
-            pause();
             error!("{}", err);
         },
     };

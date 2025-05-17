@@ -5,7 +5,7 @@ use std::fmt::Debug;
 pub type Receiver = UnboundedReceiver<Vec<u8>>;
 
 #[async_trait]
-pub trait DataSource: Debug  {
+pub trait DataSource : Debug  {
     async fn start(&mut self) -> Result<Receiver>;
     fn stop(&mut self) -> Result<()>;
 }

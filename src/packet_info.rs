@@ -4,7 +4,7 @@ use anyhow::*;
 use byteorder::{LittleEndian, ReadBytesExt};
 use chrono::Local;
 
-
+#[derive(Debug)]
 pub struct PacketInfo {
     pub op_code: u16,
     pub op_code_hex: String,

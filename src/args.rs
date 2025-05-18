@@ -33,6 +33,9 @@ pub struct CommandLineArgs {
     #[arg(long, value_enum, default_value_t = HandlerType::Tracker)]
     handler: HandlerType,
 
+    #[arg(long, default_value = Some("inbound && tcp.SrcPort == 6040"))]
+    windivert_filter: Option<String>,
+
     #[arg(long, default_value = Some("dump.bin"))]
     input_path: Option<String>,
 
@@ -50,12 +53,15 @@ impl CommandLineArgs {
     }
 
     pub fn create_data_source(&self) -> Result<Box<dyn DataSource>> {
-        let filter = "inbound && tcp.SrcPort == 6040".into();
-
+        
         match self.source {
-            DataSourceType::Windivert => Ok(Box::new(WindivertSource::new(filter))),
+            DataSourceType::Windivert => {
+                let filter = self.windivert_filter.clone().ok_or_else(|| anyhow!("Missing filter"))?;
+                Ok(Box::new(WindivertSource::new(filter)))
+            },
             DataSourceType::File => {
-                Ok(Box::new(FileDataSource::new(self.output_path.clone().unwrap())))
+                let file_path = self.output_path.clone().ok_or_else(|| anyhow!("Missing input path"))?;
+                Ok(Box::new(FileDataSource::new(file_path)))
             }
         }
     }
